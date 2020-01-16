@@ -1,0 +1,30 @@
+{
+  "id": "1615421",
+  "name": "hackathon",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1167139",
+      "name": "查询",
+      "font_class": "chaxun",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "6536711",
+      "name": "历史",
+      "font_class": "lishi",
+      "unicode": "e659",
+      "unicode_decimal": 58969
+    },
+    {
+      "icon_id": "12687054",
+      "name": "回车",
+      "font_class": "enter",
+      "unicode": "e65a",
+      "unicode_decimal": 58970
+    }
+  ]
+}

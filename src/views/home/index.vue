@@ -1,106 +1,75 @@
 <template>
   <div class="home-wrapper">
-    <header>
-      <img :src="logo" alt="" class="logo" />
-    </header>
-    <div class="container">
-      <div class="content">
-        <div class="banner">
-          <div class="dialog">
-            <div class="avatar">
-              <img :src="avatar1" alt="" />
-            </div>
-            <div class="word" id="word1"></div>
-          </div>
-          <div class="dialog">
-            <div class="avatar">
-              <img :src="avatar2" alt="" />
-            </div>
-            <div class="word" id="word2"></div>
-          </div>
-        </div>
-        <div class="search-wrapper">
-          <h3>挖掘科技竞合情报，助推企业创新变革</h3>
-          <el-input
-            v-model="queryModel.keyword"
-            prefix-icon="el-icon-search"
-            style="width:900px;"
-            placeholder="全库搜索，支持编号、机构、人名和关键词"
-            @keyup.enter.native="onSearch"
-            size="large"
-          >
-            <el-button slot="append" icon="el-icon-search" @click="onSearch"></el-button>
-          </el-input>
-          <div class="tool-wrapper">
-            <span class="tool" @click="onToggleMore">
-              <i class="iconfont icon-chaxun"></i>更多条件
-            </span>
-          </div>
-
-          <transition name="bounce">
-            <div class="more-wrappr" v-show="showMore">
-              <el-form>
-                <el-form-item label="行政区域:">
-                  <el-select
-                    v-model="queryModel.region"
-                    multiple
-                    placeholder="请选择"
-                    style="width:800px;"
-                  >
-                    <el-option
-                      v-for="item in regionList"
-                      :key="item.value"
-                      :label="item.text"
-                      :value="item.value"
-                    >
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="机构:">
-                  <el-input v-model="queryModel.org" style="width: 500px" />
-                </el-form-item>
-              </el-form>
-            </div>
-          </transition>
-        </div>
+    <div class="logo"></div>
+    <div class="search-wrapper">
+      <div class="title"></div>
+      <div class="input-wrapper">
+        <i class="el-icon-search"></i>
+        <input v-model="queryModel.keyword" />
+        <i class="iconfont icon-enter enter" @click="onSearch"></i>
       </div>
     </div>
+    <div class="tool-wrapper">
+      <span class="tool" @click="onToggleMore"> <i class="el-icon-plus"></i>更多条件 </span>
+    </div>
+    <transition name="bounce">
+      <div class="more-wrappr" v-show="showMore">
+        <el-form>
+          <el-form-item label="行政区域">
+            <el-select
+              v-model="queryModel.region"
+              multiple
+              placeholder="请选择"
+              style="width:550px;"
+            >
+              <el-option
+                v-for="item in regionList"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="机  构">
+            <el-input v-model="queryModel.org" style="width: 550px" />
+          </el-form-item>
+          <el-form-item>
+            <div class="btn" @click="onSearch">搜 索</div>
+          </el-form-item>
+        </el-form>
+      </div>
+    </transition>
     <div class="setting-wrapper" @click="showHistory = true">
       <i class="el-icon-s-tools" />
     </div>
     <el-drawer :visible.sync="showHistory">
       <div class="history-wrapper">
         <h3>检索历史</h3>
+        <el-table :data="history" style="width: 100%" max-height="700">
+          <el-table-column prop="keyword" label="关键词"> </el-table-column>
+          <el-table-column label="行政区域">
+            <template slot-scope="scope">
+              {{ scope.row.region.join(',') }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="org" label="机构"> </el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button
+                type="primary"
+                icon="el-icon-search"
+                @click="onResearch(scope.row)"
+              ></el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
-      <el-table :data="history" style="width: 100%" max-height="700">
-        <el-table-column prop="keyword" label="关键词"> </el-table-column>
-        <el-table-column label="行政区域">
-          <template slot-scope="scope">
-            {{ scope.row.region.join(',') }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="org" label="机构"> </el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button
-              type="primary"
-              icon="el-icon-search"
-              @click="onResearch(scope.row)"
-            ></el-button>
-          </template>
-        </el-table-column>
-      </el-table>
     </el-drawer>
   </div>
 </template>
 
 <script>
-import logo from './img/logo.jpg'
-import avatar1 from './img/avatar1.jpg'
-import avatar2 from './img/avatar2.jpg'
-
-import Typed from 'typed.js'
-
 import { setHistory, getHistory } from '@/utils/history'
 
 export default {
@@ -108,9 +77,6 @@ export default {
 
   data() {
     return {
-      logo,
-      avatar1,
-      avatar2,
       queryModel: {
         keyword: '',
         region: [],
@@ -234,27 +200,6 @@ export default {
 
   methods: {
     init() {
-      new Typed('#word1', {
-        strings: [`船长，我们迷路了！要往哪边航行？`],
-        loop: true,
-        // loopCount: 4,
-        typeSpeed: 50,
-        backSpeed: 0,
-        fadeOut: true,
-        showCursor: false,
-        fadeOutDelay: 2000
-      })
-      new Typed('#word2', {
-        strings: [`圣(sou)光(suo)将指引你前进！`],
-        loop: true,
-        // loopCount: 4,
-        typeSpeed: 50,
-        backSpeed: 0,
-        fadeOut: true,
-        showCursor: false,
-        startDelay: 2000,
-        fadeOutDelay: 2000
-      })
       this.history = getHistory()
     },
 
@@ -297,113 +242,107 @@ export default {
   height: 100vh;
   box-sizing: border-box;
 
-  display: float;
+  display: flex;
   flex-flow: column nowrap;
   align-items: center;
   justify-content: center;
   position: relative;
+  background: url(./img/bg.png) no-repeat;
+  background-size: cover;
 
-  header {
-    height: 60px;
-    line-height: 60px;
-    border-bottom: solid 1px #ccc;
+  .logo {
+    width: 46px;
+    height: 21px;
+    background: url(./img/logo.png);
+    position: absolute;
+    top: 20px;
+    left: 25px;
+  }
 
-    .logo {
-      height: 55px;
-      border-radius: 50%;
-      object-fit: cover;
-      padding-left: 10px;
+  .search-wrapper {
+    // height: 155px;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    padding-bottom: 20px;
+    .title {
+      width: 261px;
+      height: 26px;
+      background: url(./img/title.png) no-repeat;
+      margin-bottom: 30px;
+    }
+
+    .input-wrapper {
+      width: 592px;
+      height: 52px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      box-sizing: border-box;
+
+      i {
+        flex: 0 0 auto;
+        color: #fff;
+        font-size: 32px;
+        padding: 0 10px;
+      }
+
+      .enter {
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.5);
+
+        &:hover {
+          color: #fff;
+        }
+      }
+
+      input {
+        flex: 1 1 auto;
+        border-color: transparent;
+        background: rgba(0, 0, 0, 0);
+        color: #fff;
+        outline: none;
+        height: 24px;
+        font-size: 24px;
+      }
     }
   }
 
-  .container {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: center;
-    background: url(./img/bg.jpg) no-repeat center center;
-    background-size: cover;
-    .content {
-      width: 1200px;
-      height: calc(100vh - 60px);
-
-      .banner {
-        display: flex;
-        flex-flow: column nowrap;
-        padding-top: 50px;
-        .dialog {
-          display: flex;
-          flex-flow: row nowrap;
-          padding-bottom: 20px;
-          .avatar {
-            img {
-              width: 100px;
-              height: 100px;
-              border-radius: 50%;
-            }
-          }
-
-          .word {
-            width: 200px;
-            height: 110px;
-            background: url(./img/dialog.png) no-repeat;
-            background-size: cover;
-          }
-        }
-      }
-
-      .search-wrapper {
-        padding-top: 30px;
-        display: flex;
-        flex-flow: column nowrap;
-        align-items: center;
-        justify-content: center;
-
-        h3 {
-          color: #fff;
-          font-size: 24px;
-        }
-
-        /deep/ .el-input-group--append .el-input__inner,
-        .el-input-group__prepend {
-          border-width: 0px;
-        }
-
-        /deep/ .el-input-group__append {
-          color: #fff;
-          background-color: #061826;
-        }
-
-        /deep/ .el-input-group {
-          box-shadow: 0px 24px 31.85px 3.15px rgba(45, 45, 45, 0.4);
-          border-bottom-right-radius: 5px;
-        }
-      }
-
-      .tool-wrapper {
-        padding-top: 30px;
-        height: 60px;
+  .tool-wrapper {
+    cursor: pointer;
+    border: solid 1px rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.5);
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    &:hover {
+      color: #fff;
+      border: solid 1px #fff;
+      i {
         color: #fff;
-        display: float;
-        flex-flow: row nowrap;
-        align-items: center;
-        font-size: 18px;
-        i {
-          font-size: 24px;
-        }
-
-        .tool {
-          cursor: pointer;
-        }
       }
+    }
+  }
 
-      .more-wrappr {
-        width: 900px;
-        // height: 60px;
-        box-sizing: border-box;
-        background: #fff;
-
-        padding: 20px 0 0 20px;
-      }
+  .more-wrappr {
+    width: 592px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    box-sizing: border-box;
+    /deep/ .el-form-item__label {
+      color: #fff;
+    }
+    .btn {
+      cursor: pointer;
+      border: solid 1px #fff;
+      background: rgba(0, 0, 0, 0.4);
+      text-align: center;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 5px;
     }
   }
 
@@ -416,13 +355,15 @@ export default {
     height: 50px;
     color: #fff;
     font-size: 32px;
-    background: #1890fe;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px 0 0 10px;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
   .history-wrapper {
+    padding: 0 10px;
     display: flex;
     flex-flow: column nowrap;
     align-items: center;

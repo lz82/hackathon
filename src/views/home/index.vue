@@ -1,11 +1,11 @@
 <template>
   <div class="home-wrapper">
-    <div class="logo"></div>
+    <div class="logo" @click="onLogoClick"></div>
     <div class="search-wrapper">
       <div class="title"></div>
       <div class="input-wrapper">
         <i class="el-icon-search"></i>
-        <input v-model="queryModel.keyword" />
+        <input v-model="queryModel.keyword" @keyup.enter="onSearch" />
         <i class="iconfont icon-enter enter" @click="onSearch"></i>
       </div>
     </div>
@@ -249,6 +249,10 @@ export default {
       } else {
         return true
       }
+    },
+
+    onLogoClick() {
+      this.$router.push('/')
     }
   }
 }
@@ -275,6 +279,7 @@ export default {
     position: absolute;
     top: 20px;
     left: 25px;
+    cursor: pointer;
   }
 
   .search-wrapper {
@@ -324,7 +329,7 @@ export default {
         color: #fff;
         outline: none;
         height: 24px;
-        font-size: 24px;
+        font-size: 22px;
       }
     }
   }

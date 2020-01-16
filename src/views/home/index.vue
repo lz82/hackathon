@@ -71,6 +71,7 @@
 
 <script>
 import { setHistory, getHistory } from '@/utils/history'
+import { mapMutations } from 'vuex'
 
 export default {
   name: 'Home',
@@ -199,17 +200,22 @@ export default {
   },
 
   methods: {
+    ...mapMutations(['setQueryModel']),
+
     init() {
       this.history = getHistory()
     },
 
     onSearch() {
-      setHistory(this.queryModel)
-      this.history = getHistory()
+      if (this.checkQuery()) {
+        setHistory(this.queryModel)
+        this.history = getHistory()
+        this.setQueryModel(this.queryModel)
+        this.$router.push('/search')
+      }
     },
 
     onResearch({ keyword, region, org }) {
-      debugger
       this.queryModel = {
         keyword,
         region,
@@ -217,6 +223,8 @@ export default {
       }
       setHistory(this.queryModel)
       this.history = getHistory()
+      this.setQueryModel(this.queryModel)
+      this.$router.push('/search')
     },
 
     onToggleHistory() {
@@ -230,6 +238,16 @@ export default {
       this.showMore = !this.showMore
       if (this.showHistory) {
         this.showHistory = false
+      }
+    },
+
+    checkQuery() {
+      const { keyword, region, org } = this.queryModel
+      if (!keyword.trim() && region.length === 0 && !org.trim()) {
+        this.$message.error('请输入检索条件')
+        return false
+      } else {
+        return true
       }
     }
   }

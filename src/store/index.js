@@ -1,11 +1,22 @@
-import Vue from "vue";
-import Vuex from "vuex";
+import Vue from 'vue'
+import Vuex from 'vuex'
 
-Vue.use(Vuex);
+import * as getters from './getters'
+
+Vue.use(Vuex)
 
 export default new Vuex.Store({
-  state: {},
-  mutations: {},
-  actions: {},
-  modules: {}
-});
+  state: {
+    currentQuery: {
+      keyword: '',
+      region: [],
+      org: ''
+    }
+  },
+  mutations: {
+    setQueryModel(state, model) {
+      state.currentQuery = model
+    }
+  },
+  getters
+})

@@ -27,6 +27,7 @@ export default {
   methods: {
     init() {
       new Snow({
+        container: document.querySelector('.entry-wrapper'),
         color: '#fff',
         minSize: 10, // Default: 8
         maxSize: 30,
@@ -38,7 +39,8 @@ export default {
         loopCount: Infinity,
         typeSpeed: 50,
         backSpeed: 0,
-        fadeOut: true
+        fadeOut: true,
+        showCursor: false
       })
     },
 

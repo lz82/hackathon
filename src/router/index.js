@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-const Entry = () => import(/* webpackChunkName: "home" */ '../views/entry')
-const Home = () => import(/* webpackChunkName: "home" */ '../views/home')
-const Search = () => import(/* webpackChunkName: "search" */ '../views/search')
+const Entry = () => import(/* webpackChunkName: "home" */ '@/views/entry')
+const Home = () => import(/* webpackChunkName: "home" */ '@/views/home')
+const Search = () => import(/* webpackChunkName: "search" */ '@/views/search')
 
 Vue.use(VueRouter)
 

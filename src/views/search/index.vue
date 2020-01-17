@@ -43,9 +43,18 @@
       <div class="tab" :class="{ active: currentTab === 2 }" @click="currentTab = 2">文献</div>
     </div>
     <div class="tbl-wrapper" v-show="currentTab === 1">
-      <span class="export" style="color: #fff;" @click="onExportClick"
-        ><i class="el-icon-download">导出</i></span
-      >
+      <div class="export-wrapper">
+        <el-dropdown @command="handleExportCommand">
+          <el-button type="primary">
+            导出<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="xlsx">excel</el-dropdown-item>
+            <el-dropdown-item command="csv">csv</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
+
       <div class="tbl-content" v-for="(row, index) in tblData" :key="index">
         <div class="title">
           <h3 v-html="row['title.text_zh']"></h3>
@@ -73,9 +82,18 @@
     </div>
 
     <div class="tbl-wrapper" v-show="currentTab === 2">
-      <span class="export" style="color: #fff;" @click="onExportClick"
-        ><i class="el-icon-download">导出</i></span
-      >
+      <div class="export-wrapper">
+        <el-dropdown @command="handleExportCommand">
+          <el-button type="primary">
+            导出<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="xlsx">excel</el-dropdown-item>
+            <el-dropdown-item command="csv">csv</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
+
       <div class="tbl-content" v-for="(row, index) in tblData" :key="index">
         <div class="title">
           <h3 v-html="row['sc_title']"></h3>
@@ -196,9 +214,13 @@ export default {
       }
       this.handleQuery()
       this.initChart()
+      this.history = getHistory()
     },
 
     onSearch() {
+      this.queryModel.region = []
+      this.queryModel.org = ''
+      this.queryModel.page = 1
       if (this.checkQuery()) {
         setHistory(this.queryModel)
         this.history = getHistory()
@@ -216,7 +238,19 @@ export default {
       }
     },
 
-    onResearch() {},
+    onResearch({ keyword, region, org }) {
+      this.queryModel = {
+        keyword,
+        region,
+        org,
+        page: 1,
+        pageSize: 10
+      }
+      setHistory(this.queryModel)
+      this.history = getHistory()
+      this.setQueryModel(this.queryModel)
+      this.handleQuery()
+    },
 
     onQuery() {
       this.handleQuery()
@@ -228,7 +262,7 @@ export default {
         regional: this.queryModel.region.join(','),
         org: this.queryModel.org,
         yearType: 999,
-        page: this.queryModel.page,
+        page: this.queryModel.page - 1,
         pageSize: this.queryModel.pageSize
       }
       if (this.currentTab === 1) {
@@ -240,6 +274,7 @@ export default {
         this.tblCnt = total
         this.tblData = data
       }
+      this.initChart()
     },
 
     getTagType(val) {
@@ -256,8 +291,6 @@ export default {
     },
 
     async onExportClick() {
-      console.log(exportJson2Excel)
-
       const postData = {
         query: this.queryModel.keyword,
         regional: this.queryModel.region.join(','),
@@ -269,7 +302,6 @@ export default {
 
       if (this.currentTab === 1) {
         const { data } = await getPatentList(postData)
-
         exportJson2Excel(data, '搜索结果', '专利')
       } else {
         const { data } = await getPaperList(postData)
@@ -329,6 +361,35 @@ export default {
 
     onMoreClick() {
       this.$router.push('/report')
+    },
+
+    async handleExportCommand(c) {
+      const postData = {
+        query: this.queryModel.keyword,
+        regional: this.queryModel.region.join(','),
+        org: this.queryModel.org,
+        yearType: 999,
+        page: 1,
+        pageSize: 9999
+      }
+
+      if (this.currentTab === 1) {
+        const { data } = await getPatentList(postData)
+        if (data && data.length > 0) {
+          exportJson2Excel(data, '搜索结果', '专利', null, c)
+        } else {
+          this.$message.error('暂无数据')
+        }
+      } else {
+        if (data && data.length > 0) {
+          const { data } = await getPaperList(postData)
+          exportJson2Excel(data, '搜索结果', '文献', null, c)
+        } else {
+          this.$message.error('暂无数据')
+        }
+        const { data } = await getPaperList(postData)
+        exportJson2Excel(data, '搜索结果', '文献', null, c)
+      }
     }
   },
 
@@ -471,6 +532,12 @@ export default {
       color: #fff;
     }
 
+    .export-wrapper {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: flex-end;
+    }
+
     .tbl-content {
       display: flex;
       flex-flow: column nowrap;
@@ -506,6 +573,7 @@ export default {
   }
 
   .setting-wrapper {
+    cursor: pointer;
     position: fixed;
     right: 0;
     top: 50%;

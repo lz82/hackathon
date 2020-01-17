@@ -57,9 +57,10 @@ function setHeader(ws, header) {
   return ws
 }
 
-export function exportJson2Excel(jsonData, defaultTitle, sheetName, header) {
+export function exportJson2Excel(jsonData, defaultTitle, sheetName, header, format) {
   var data = jsonData
   var wsName = sheetName || 'SheetJS'
+  let append = format || 'xlsx'
 
   var wb = new Workbook()
   var ws = XLSX.utils.json_to_sheet(data)
@@ -70,7 +71,8 @@ export function exportJson2Excel(jsonData, defaultTitle, sheetName, header) {
   wb.SheetNames.push(wsName)
   wb.Sheets[wsName] = ws
   var wbout = XLSX.write(wb, {
-    bookType: 'xlsx',
+    // bookType: 'xlsx',
+    bookType: append,
     bookSST: false,
     type: 'binary'
   })
@@ -79,6 +81,6 @@ export function exportJson2Excel(jsonData, defaultTitle, sheetName, header) {
     new Blob([s2ab(wbout)], {
       type: 'application/octet-stream'
     }),
-    title + '.xlsx'
+    title + '.' + append
   )
 }

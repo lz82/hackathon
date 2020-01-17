@@ -41,6 +41,12 @@ export default {
     })
   },
 
+  watch: {
+    chartData() {
+      this.initData()
+    }
+  },
+
   methods: {
     initData() {
       const localLegend = JSON.parse(JSON.stringify(this.legend)).reverse()

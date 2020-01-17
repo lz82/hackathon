@@ -50,7 +50,7 @@
           <el-table-column prop="keyword" label="关键词"> </el-table-column>
           <el-table-column label="行政区域">
             <template slot-scope="scope">
-              {{ scope.row.region.join(',') }}
+              {{ scope.row.region ? scope.row.region.join(',') : '' }}
             </template>
           </el-table-column>
           <el-table-column prop="org" label="机构"> </el-table-column>
@@ -370,6 +370,7 @@ export default {
   }
 
   .setting-wrapper {
+    cursor: pointer;
     position: absolute;
     right: 0;
     top: 50%;

@@ -56,7 +56,7 @@ export default {
           trigger: 'item',
           position: 'inside'
         },
-        color: ['#f2ef00', '#52cc64', '#00ccf2', '#7c6dfd', '#f35853', '#ff8600', '#4d7aff'],
+        color: ['#00ccf2', '#ff8600', '#f2ef00', '#7c6dfd', '#f35853', '#52cc64', '#4d7aff'],
         legend: {
           type: 'scroll',
           textStyle: {

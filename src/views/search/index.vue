@@ -11,7 +11,14 @@
       </div>
     </header>
 
-    <div class="chart-wrapper">
+    <div
+      class="chart-wrapper"
+      v-if="
+        chartData.type.chartData.length ||
+          chartData.grant.chartData.length ||
+          chartData.legal.chartData.length
+      "
+    >
       <ring-chart
         v-if="chartData.type.chartData.length"
         :legend="chartData.type.legend"
@@ -54,31 +61,35 @@
           </el-dropdown-menu>
         </el-dropdown>
       </div>
-
-      <div class="tbl-content" v-for="(row, index) in tblData" :key="index">
-        <div class="title">
-          <h3 v-html="row['title.text_zh']"></h3>
-          <el-tag
-            v-show="row['legal_status_result.legalstatus']"
-            :type="getTagType(row['legal_status_result.legalstatus'])"
-            >{{ row['legal_status_result.legalstatus'] }}</el-tag
-          >
+      <div class="data-wrapp" v-if="tblCnt > 0">
+        <div class="tbl-content" v-for="(row, index) in tblData" :key="index">
+          <div class="title">
+            <h3 v-html="row['title.text_zh']"></h3>
+            <el-tag
+              v-show="row['legal_status_result.legalstatus']"
+              :type="getTagType(row['legal_status_result.legalstatus'])"
+              >{{ row['legal_status_result.legalstatus'] }}</el-tag
+            >
+          </div>
+          <div class="info">
+            <span class="agency">{{ row['agents.agency'] }}</span>
+            <span class="inventors">发明人:{{ row['inventors.name_zh'] }}</span>
+            <span class="ipcs">分类号：{{ row['ipcs.maingroup'] }}</span>
+          </div>
+          <div class="desc">摘要:{{ row['abstract.text_zh'] }}</div>
         </div>
-        <div class="info">
-          <span class="agency">{{ row['agents.agency'] }}</span>
-          <span class="inventors">发明人:{{ row['inventors.name_zh'] }}</span>
-          <span class="ipcs">分类号：{{ row['ipcs.maingroup'] }}</span>
-        </div>
-        <div class="desc">摘要:{{ row['abstract.text_zh'] }}</div>
+        <el-pagination
+          @current-change="onQuery"
+          :current-page.sync="queryModel.page"
+          :page-size="queryModel.pageSize"
+          layout="total,  prev, pager, next"
+          :total="tblCnt"
+        >
+        </el-pagination>
       </div>
-      <el-pagination
-        @current-change="onQuery"
-        :current-page.sync="queryModel.page"
-        :page-size="queryModel.pageSize"
-        layout="total,  prev, pager, next"
-        :total="tblCnt"
-      >
-      </el-pagination>
+      <div class="no-data" v-else>
+        暂无数据
+      </div>
     </div>
 
     <div class="tbl-wrapper" v-show="currentTab === 2">
@@ -94,25 +105,30 @@
         </el-dropdown>
       </div>
 
-      <div class="tbl-content" v-for="(row, index) in tblData" :key="index">
-        <div class="title">
-          <h3 v-html="row['sc_title']"></h3>
+      <div class="data-wrapper" v-if="tblCnt > 0">
+        <div class="tbl-content" v-for="(row, index) in tblData" :key="index">
+          <div class="title">
+            <h3 v-html="row['sc_title']"></h3>
+          </div>
+          <div class="info">
+            <span class="agency">{{ row['sc_author.sc_affiliate'] }}</span>
+            <span class="inventors">作者:{{ row['sc_author.sc_name'] }}</span>
+            <span class="ipcs">关键词:{{ row['sc_keyword'] }}</span>
+          </div>
+          <div class="desc">摘要:{{ row['sc_abstract'] }}</div>
         </div>
-        <div class="info">
-          <span class="agency">{{ row['sc_author.sc_affiliate'] }}</span>
-          <span class="inventors">作者:{{ row['sc_author.sc_name'] }}</span>
-          <span class="ipcs">关键词:{{ row['sc_keyword'] }}</span>
-        </div>
-        <div class="desc">摘要:{{ row['sc_abstract'] }}</div>
+        <el-pagination
+          @current-change="onQuery"
+          :current-page.sync="queryModel.page"
+          :page-size="queryModel.pageSize"
+          layout="total,  prev, pager, next"
+          :total="tblCnt"
+        >
+        </el-pagination>
       </div>
-      <el-pagination
-        @current-change="onQuery"
-        :current-page.sync="queryModel.page"
-        :page-size="queryModel.pageSize"
-        layout="total,  prev, pager, next"
-        :total="tblCnt"
-      >
-      </el-pagination>
+      <div class="no-data" v-else>
+        暂无数据
+      </div>
     </div>
 
     <div class="setting-wrapper" @click="showHistory = true">
@@ -257,24 +273,28 @@ export default {
     },
 
     async handleQuery() {
-      const postData = {
-        query: this.queryModel.keyword,
-        regional: this.queryModel.region.join(','),
-        org: this.queryModel.org,
-        yearType: 999,
-        page: this.queryModel.page - 1,
-        pageSize: this.queryModel.pageSize
+      try {
+        const postData = {
+          query: this.queryModel.keyword,
+          regional: this.queryModel.region.join(','),
+          org: this.queryModel.org,
+          yearType: 999,
+          page: this.queryModel.page - 1,
+          pageSize: this.queryModel.pageSize
+        }
+        if (this.currentTab === 1) {
+          const { total, data } = await getPatentList(postData)
+          this.tblCnt = total
+          this.tblData = data
+        } else {
+          const { total, data } = await getPaperList(postData)
+          this.tblCnt = total
+          this.tblData = data
+        }
+        this.initChart()
+      } catch (err) {
+        this.$message.error('获取数据异常，请重新查询！')
       }
-      if (this.currentTab === 1) {
-        const { total, data } = await getPatentList(postData)
-        this.tblCnt = total
-        this.tblData = data
-      } else {
-        const { total, data } = await getPaperList(postData)
-        this.tblCnt = total
-        this.tblData = data
-      }
-      this.initChart()
     },
 
     getTagType(val) {
@@ -327,36 +347,40 @@ export default {
     },
 
     async initChart() {
-      const postData = {
-        query: this.queryModel.keyword,
-        regional: this.queryModel.region.join(','),
-        org: this.queryModel.org
-      }
-      const res = await getIndexVisual(postData)
-      const {
-        stats_type: type,
-        stats_granted_status: grant,
-        stats_legal_status: legal
-      } = res.indexVisual[0]
+      try {
+        const postData = {
+          query: this.queryModel.keyword,
+          regional: this.queryModel.region.join(','),
+          org: this.queryModel.org
+        }
+        const res = await getIndexVisual(postData)
+        const {
+          stats_type: type,
+          stats_granted_status: grant,
+          stats_legal_status: legal
+        } = res.indexVisual[0]
 
-      this.chartData.type.chartData = type.buckets.map((item) => {
-        return {
-          value: item.doc_count,
-          name: this.getPatentType(item.key)
-        }
-      })
-      this.chartData.grant.chartData = grant.buckets.map((item) => {
-        return {
-          value: item.doc_count,
-          name: item.key === '1' ? '已授权' : '未授权'
-        }
-      })
-      this.chartData.legal.chartData = legal.buckets.map((item) => {
-        return {
-          value: item.doc_count,
-          name: item.key
-        }
-      })
+        this.chartData.type.chartData = type.buckets.map((item) => {
+          return {
+            value: item.doc_count,
+            name: this.getPatentType(item.key)
+          }
+        })
+        this.chartData.grant.chartData = grant.buckets.map((item) => {
+          return {
+            value: item.doc_count,
+            name: item.key === '1' ? '已授权' : '未授权'
+          }
+        })
+        this.chartData.legal.chartData = legal.buckets.map((item) => {
+          return {
+            value: item.doc_count,
+            name: item.key
+          }
+        })
+      } catch (err) {
+        this.message.error('获取数据异常，请重试！')
+      }
     },
 
     onMoreClick() {
@@ -364,31 +388,35 @@ export default {
     },
 
     async handleExportCommand(c) {
-      const postData = {
-        query: this.queryModel.keyword,
-        regional: this.queryModel.region.join(','),
-        org: this.queryModel.org,
-        yearType: 999,
-        page: 1,
-        pageSize: 9999
-      }
-
-      if (this.currentTab === 1) {
-        const { data } = await getPatentList(postData)
-        console.log(data)
-        if (data && data.length > 0) {
-          exportJson2Excel(data, '搜索结果', '专利', null, c)
-        } else {
-          this.$message.error('暂无数据')
+      try {
+        const postData = {
+          query: this.queryModel.keyword,
+          regional: this.queryModel.region.join(','),
+          org: this.queryModel.org,
+          yearType: 999,
+          page: 1,
+          pageSize: 9999
         }
-      } else {
-        const { data } = await getPaperList(postData)
 
-        if (data && data.length > 0) {
-          exportJson2Excel(data, '搜索结果', '文献', null, c)
+        if (this.currentTab === 1) {
+          const { data } = await getPatentList(postData)
+          console.log(data)
+          if (data && data.length > 0) {
+            exportJson2Excel(data, '搜索结果', '专利', null, c)
+          } else {
+            this.$message.error('暂无数据')
+          }
         } else {
-          this.$message.error('暂无数据')
+          const { data } = await getPaperList(postData)
+
+          if (data && data.length > 0) {
+            exportJson2Excel(data, '搜索结果', '文献', null, c)
+          } else {
+            this.$message.error('暂无数据')
+          }
         }
+      } catch (err) {
+        this.$message.error('获取数据异常，请重新查询!')
       }
     }
   },
@@ -507,18 +535,20 @@ export default {
 
     display: flex;
     flex-flow: row nowrap;
-    border-bottom: solid 1px #fff;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.4);
 
     .tab {
       cursor: pointer;
       width: 60px;
       text-align: center;
       padding: 10px;
+      margin: 0 10px;
       // border: solid 1px #fff;
 
       &.active {
-        color: blue;
+        color: #fff;
+        font-weight: 700;
+        border-bottom: solid 2px #fff;
       }
     }
   }
@@ -543,6 +573,8 @@ export default {
       flex-flow: column nowrap;
       color: #fff;
       margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: solid 1px rgba(255, 255, 255, 0.3);
 
       .title {
         display: flex;
@@ -569,6 +601,9 @@ export default {
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
       }
+    }
+    .no-data {
+      color: #fff;
     }
   }
 

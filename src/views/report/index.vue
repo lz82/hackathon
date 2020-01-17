@@ -5,15 +5,66 @@
         <div class="logo" @click="onLogoClick"></div>
       </div>
     </header>
+
+    <div class="map-wrapper">
+      <chart-map />
+    </div>
+
+    <div class="line-wrapp">
+      <chart-line />
+    </div>
+
+    <div class="bar-wrapper">
+      <chart-bar />
+    </div>
   </div>
 </template>
 
 <script>
+import ChartMap from './components/map'
+import ChartLine from './components/line'
+import ChartBar from './components/bar'
+
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'Report',
 
+  components: {
+    ChartMap,
+    ChartLine,
+    ChartBar
+  },
+
   data() {
     return {}
+  },
+
+  computed: {
+    ...mapGetters(['currentQuery'])
+  },
+
+  mounted() {
+    this.$nextTick(() => {
+      if (!this.checkQuery()) {
+        this.$router.push('/home')
+      }
+    })
+  },
+
+  methods: {
+    onLogoClick() {
+      this.$router.go(-1)
+    },
+
+    checkQuery() {
+      const { keyword, region, org } = this.currentQuery
+      if (!keyword.trim() && region.length === 0 && !org.trim()) {
+        return false
+      } else {
+        return true
+      }
+    }
   }
 }
 </script>
@@ -53,6 +104,30 @@ export default {
         cursor: pointer;
       }
     }
+  }
+
+  .map-wrapper {
+    width: 1200px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 0 10px 10px 10px;
+    padding: 10px;
+    margin-top: 20px;
+  }
+
+  .line-wrapp {
+    width: 1200px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 0 10px 10px 10px;
+    padding: 10px;
+    margin: 20px 0;
+  }
+
+  .bar-wrapper {
+    width: 1200px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 0 10px 10px 10px;
+    padding: 10px;
+    margin-bottom: 20px;
   }
 }
 </style>

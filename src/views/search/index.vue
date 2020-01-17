@@ -375,20 +375,20 @@ export default {
 
       if (this.currentTab === 1) {
         const { data } = await getPatentList(postData)
+        console.log(data)
         if (data && data.length > 0) {
           exportJson2Excel(data, '搜索结果', '专利', null, c)
         } else {
           this.$message.error('暂无数据')
         }
       } else {
+        const { data } = await getPaperList(postData)
+
         if (data && data.length > 0) {
-          const { data } = await getPaperList(postData)
           exportJson2Excel(data, '搜索结果', '文献', null, c)
         } else {
           this.$message.error('暂无数据')
         }
-        const { data } = await getPaperList(postData)
-        exportJson2Excel(data, '搜索结果', '文献', null, c)
       }
     }
   },
